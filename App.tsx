@@ -56,8 +56,7 @@ const CreditsFooter = () => (
     </div>
 );
 
-const App: React.FC = () => {
-  const [gameState, setGameState] = useState<GameState>({
+const INITIAL_STATE: GameState = {
     status: 'SETUP',
     difficulty: 'EASY',
     inputMethod: 'DIGITAL',
@@ -69,8 +68,10 @@ const App: React.FC = () => {
     winner: null,
     turnMessage: '',
     validNextNodes: [],
-  });
+};
 
+const App: React.FC = () => {
+  const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile
@@ -79,6 +80,28 @@ const App: React.FC = () => {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Handle Back Button / History Navigation
+  useEffect(() => {
+    // 1. If page loads with #game hash but we are in SETUP (refresh), clean URL
+    if (window.location.hash === '#game') {
+        window.history.replaceState(null, '', window.location.pathname);
+    }
+
+    // 2. Listen for back button (popstate)
+    const handlePopState = () => {
+        // If user goes back, reset to setup
+        setGameState(prev => {
+            if (prev.status !== 'SETUP') {
+                return { ...INITIAL_STATE };
+            }
+            return prev;
+        });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const getTurnMessage = (player: Player | undefined, maze: GameNode[]) => {
@@ -92,6 +115,9 @@ const App: React.FC = () => {
   };
 
   const startGame = (playerNames: string[], difficulty: Difficulty, inputMethod: InputMethod) => {
+    // Push state so back button works to exit game
+    window.history.pushState({ status: 'PLAYING' }, '', '#game');
+
     const newMaze = generateMaze(difficulty);
     const newPlayers: Player[] = playerNames.map((name, i) => ({
       id: i,
@@ -286,19 +312,13 @@ const App: React.FC = () => {
   };
 
   const resetGame = () => {
-      setGameState({
-        status: 'SETUP',
-        difficulty: 'EASY',
-        inputMethod: 'DIGITAL',
-        players: [],
-        currentPlayerIndex: 0,
-        maze: [],
-        lastSpinResult: null,
-        isSpinning: false,
-        winner: null,
-        turnMessage: '',
-        validNextNodes: [],
-      });
+      // If we are in game mode with hash, go back to trigger popstate
+      if (window.location.hash === '#game') {
+          window.history.back();
+      } else {
+          // Fallback reset
+          setGameState(INITIAL_STATE);
+      }
   };
 
   const currentPlayer = gameState.status === 'PLAYING' ? gameState.players[gameState.currentPlayerIndex] : null;
@@ -376,8 +396,8 @@ const App: React.FC = () => {
               onManualInput={handleManualSpin}
               isMobile={isMobile}
             />
-            {/* Show credits in footer on desktop, hide on mobile to save space unless extra small */}
-            <div className="hidden md:block">
+            {/* Show credits in footer everywhere including mobile */}
+            <div>
                 <CreditsFooter />
             </div>
         </div>
