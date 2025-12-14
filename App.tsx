@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GameState, GameStatus, Player, DREIDEL_LETTERS, DreidelLetter, Difficulty, InputMethod, GameNode } from './types';
 import { generateMaze, PLAYER_COLORS } from './constants';
 import GameSetup from './components/GameSetup';
@@ -70,6 +70,16 @@ const App: React.FC = () => {
     turnMessage: '',
     validNextNodes: [],
   });
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const getTurnMessage = (player: Player | undefined, maze: GameNode[]) => {
       if (!player) return '';
@@ -294,7 +304,8 @@ const App: React.FC = () => {
   const currentPlayer = gameState.status === 'PLAYING' ? gameState.players[gameState.currentPlayerIndex] : null;
 
   return (
-    <div className={`h-screen bg-slate-900 flex flex-col items-center relative overflow-hidden transition-colors duration-1000`}>
+    // Use h-[100dvh] for mobile browsers to account for address bar
+    <div className={`h-[100dvh] bg-slate-900 flex flex-col items-center relative overflow-hidden transition-colors duration-1000`}>
         
         {/* Background Atmosphere */}
         {currentPlayer && (
@@ -303,45 +314,45 @@ const App: React.FC = () => {
 
         {/* SETUP HEADER (Only shown during Setup) */}
         {gameState.status === 'SETUP' && (
-             <header className="w-full h-20 p-4 bg-slate-950 border-b-4 border-yellow-600/50 shadow-2xl flex justify-center items-center z-20 shrink-0 gap-3">
+             <header className="w-full h-16 md:h-20 p-4 bg-slate-950 border-b-4 border-yellow-600/50 shadow-2xl flex justify-center items-center z-20 shrink-0 gap-3">
                 <div className="bg-slate-800 p-2 rounded-xl shadow-inner border border-slate-700">
                     <MenorahLogo />
                 </div>
-                <h1 className="text-2xl font-bold text-yellow-100 tracking-wide drop-shadow-md">מבוך הסביבונים</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-yellow-100 tracking-wide drop-shadow-md">מבוך הסביבונים</h1>
             </header>
         )}
 
-        {/* GAME HUD (Heads Up Display - Only shown during Playing) */}
+        {/* GAME HUD (Heads Up Display) */}
         {gameState.status === 'PLAYING' && currentPlayer && (
-            <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-30 pointer-events-none">
-                 {/* Right Side (RTL Start): Current Player Indicator */}
-                 <div className="pointer-events-auto flex items-center gap-3 bg-slate-800/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-600 shadow-xl transform transition-all duration-500">
+            <div className="absolute top-0 left-0 w-full p-2 md:p-4 flex justify-between items-start z-30 pointer-events-none">
+                 {/* Right Side: Current Player Indicator */}
+                 <div className="pointer-events-auto flex items-center gap-2 md:gap-3 bg-slate-800/80 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-slate-600 shadow-xl transform transition-all duration-500">
                     <div className="flex flex-col text-right">
                         <span className="text-[10px] text-slate-400 font-medium">תור של</span>
-                        <span className={`text-base sm:text-lg font-bold ${PLAYER_COLORS[gameState.currentPlayerIndex].text} drop-shadow-sm`}>
+                        <span className={`text-sm md:text-lg font-bold ${PLAYER_COLORS[gameState.currentPlayerIndex].text} drop-shadow-sm`}>
                             {currentPlayer.name}
                         </span>
                     </div>
-                    <div className={`w-4 h-4 rounded-full animate-pulse shadow-[0_0_10px_currentColor] ${currentPlayer.color} border-2 border-white/20`}></div>
+                    <div className={`w-3 h-3 md:w-4 md:h-4 rounded-full animate-pulse shadow-[0_0_10px_currentColor] ${currentPlayer.color} border-2 border-white/20`}></div>
                 </div>
 
-                {/* Left Side (RTL End): Home Button */}
+                {/* Left Side: Home Button */}
                 <button 
                     onClick={resetGame}
-                    className="pointer-events-auto p-3 rounded-full bg-slate-800/80 backdrop-blur-md text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-600 shadow-lg transition-all active:scale-95"
+                    className="pointer-events-auto p-2 md:p-3 rounded-full bg-slate-800/80 backdrop-blur-md text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-600 shadow-lg transition-all active:scale-95"
                     title="חזרה למסך ראשי"
                 >
-                    <Home size={20} />
+                    <Home size={18} />
                 </button>
             </div>
         )}
 
-      {/* Main Content Area - Full flexibility for the board */}
-      <main className="w-full flex-1 relative z-10 overflow-hidden flex items-center justify-center p-2">
+      {/* Main Content Area - Scrollable for Setup, Fixed for Game */}
+      <main className={`w-full flex-1 relative z-10 flex items-center justify-center p-2 ${gameState.status === 'SETUP' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {gameState.status === 'SETUP' && <GameSetup onStart={startGame} />}
         
         {gameState.status === 'PLAYING' && (
-          <div className="w-full h-full flex items-center justify-center pt-8 pb-2">
+          <div className="w-full h-full flex items-center justify-center pt-10 pb-0 md:pt-8 md:pb-2">
              <GameBoard 
                 maze={gameState.maze} 
                 players={gameState.players} 
@@ -358,17 +369,21 @@ const App: React.FC = () => {
 
       {/* Footer / Control Bar */}
       {gameState.status === 'PLAYING' ? (
-        <div className="w-full bg-slate-950 border-t-4 border-yellow-600/50 py-1 px-4 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] z-20 shrink-0 flex flex-col gap-1">
+        <div className="w-full bg-slate-950 border-t-4 border-yellow-600/50 py-1 px-2 md:px-4 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] z-20 shrink-0 flex flex-col gap-0.5">
            <ControlPanel 
               gameState={gameState} 
               onSpin={spinDreidel}
               onManualInput={handleManualSpin}
+              isMobile={isMobile}
             />
-            <CreditsFooter />
+            {/* Show credits in footer on desktop, hide on mobile to save space unless extra small */}
+            <div className="hidden md:block">
+                <CreditsFooter />
+            </div>
         </div>
       ) : (
         // Persistent Footer for non-playing states
-        <div className="absolute bottom-1 w-full flex justify-center pb-2 z-40">
+        <div className="relative md:absolute bottom-1 w-full flex justify-center pb-2 z-40">
             <CreditsFooter />
         </div>
       )}

@@ -27,13 +27,13 @@ const GameSetup: React.FC<GameSetupProps> = ({ onStart }) => {
   };
 
   return (
-    <div className="bg-slate-800/90 backdrop-blur p-6 rounded-2xl shadow-2xl border border-slate-700 max-w-4xl w-full text-center mx-4 flex flex-col md:flex-row gap-8">
+    <div className="bg-slate-800/90 backdrop-blur p-4 md:p-6 rounded-2xl shadow-2xl border border-slate-700 max-w-4xl w-full text-center mx-2 md:mx-4 flex flex-col md:flex-row gap-6 md:gap-8 my-auto">
       
       {/* Left Column (Inputs) */}
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 space-y-4 md:space-y-6">
         <div>
-            <h2 className="text-xl font-bold mb-4 text-white flex items-center justify-center gap-2">
-                <Users className="text-blue-400" />
+            <h2 className="text-lg md:text-xl font-bold mb-3 text-white flex items-center justify-center gap-2">
+                <Users className="text-blue-400 w-5 h-5" />
                 פרטי שחקנים
             </h2>
             
@@ -66,7 +66,8 @@ const GameSetup: React.FC<GameSetupProps> = ({ onStart }) => {
                             placeholder={`שם לשחקן ${i + 1}`}
                             value={names[i]}
                             onChange={(e) => handleNameChange(i, e.target.value)}
-                            className="bg-transparent border-none outline-none text-white w-full placeholder-slate-500 text-sm"
+                            // text-base prevents iOS zoom on focus
+                            className="bg-transparent border-none outline-none text-white w-full placeholder-slate-500 text-base"
                             maxLength={10}
                         />
                     </div>
@@ -79,12 +80,12 @@ const GameSetup: React.FC<GameSetupProps> = ({ onStart }) => {
       <div className="hidden md:block w-px bg-slate-700"></div>
 
       {/* Right Column (Settings) */}
-      <div className="flex-1 flex flex-col justify-between gap-6">
+      <div className="flex-1 flex flex-col justify-between gap-4 md:gap-6">
          
          {/* Difficulty */}
          <div>
-            <h2 className="text-xl font-bold mb-3 text-white flex items-center justify-center gap-2">
-                <Layers className="text-orange-400" />
+            <h2 className="text-lg md:text-xl font-bold mb-2 md:mb-3 text-white flex items-center justify-center gap-2">
+                <Layers className="text-orange-400 w-5 h-5" />
                 רמת קושי
             </h2>
             <div className="grid grid-cols-3 gap-2">
@@ -110,39 +111,39 @@ const GameSetup: React.FC<GameSetupProps> = ({ onStart }) => {
 
          {/* Input Method */}
          <div>
-            <h2 className="text-xl font-bold mb-3 text-white flex items-center justify-center gap-2">
-                <Box className="text-emerald-400" />
+            <h2 className="text-lg md:text-xl font-bold mb-2 md:mb-3 text-white flex items-center justify-center gap-2">
+                <Box className="text-emerald-400 w-5 h-5" />
                 סוג סביבון
             </h2>
             <div className="grid grid-cols-2 gap-3">
                  <button
                     onClick={() => setInputMethod('DIGITAL')}
-                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                    className={`p-2 md:p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 md:gap-2 ${
                         inputMethod === 'DIGITAL' 
                         ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg' 
                         : 'bg-slate-700 border-slate-600 text-slate-400 hover:bg-slate-600'
                     }`}
                  >
-                    <Smartphone size={20} />
-                    <span className="text-sm font-bold">סביבון במשחק</span>
+                    <Smartphone size={20} className="hidden md:block" />
+                    <span className="text-sm font-bold">במשחק</span>
                  </button>
                  <button
                     onClick={() => setInputMethod('PHYSICAL')}
-                    className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                    className={`p-2 md:p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1 md:gap-2 ${
                         inputMethod === 'PHYSICAL' 
                         ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg' 
                         : 'bg-slate-700 border-slate-600 text-slate-400 hover:bg-slate-600'
                     }`}
                  >
-                    <Box size={20} />
-                    <span className="text-sm font-bold">סביבון אמיתי</span>
+                    <Box size={20} className="hidden md:block" />
+                    <span className="text-sm font-bold">אמיתי</span>
                  </button>
             </div>
          </div>
 
          <button
             onClick={handleStart}
-            className="w-full mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3 transition-transform active:scale-95 shadow-lg shadow-blue-900/50"
+            className="w-full mt-2 md:mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 md:py-4 rounded-xl font-bold text-lg md:text-xl flex items-center justify-center gap-3 transition-transform active:scale-95 shadow-lg shadow-blue-900/50"
         >
             <Play size={24} fill="currentColor" />
             יאללה מתחילים!
